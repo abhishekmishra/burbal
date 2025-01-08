@@ -15,12 +15,15 @@ let label = "";
 // A variable to hold the confidence of the classification
 let confidence = 0;
 
+// An array of balloons
+let balloons = [];
+
 // preload() runs once before setup()
 function preload() {
   // Load the MobileNet model
   // Initialize the Image Classifier method with MobileNet
-  classifier = ml5.imageClassifier("MobileNet");
-  classifier.classifyStart(video, gotResult);
+  // classifier = ml5.imageClassifier("MobileNet");
+  // classifier.classifyStart(video, gotResult);
 }
 
 // get the results
@@ -31,29 +34,53 @@ function gotResult(results, error) {
   }
   label = results[0].label;
   confidence = results[0].confidence;
-  // console.log(label, confidence);
-  classifier.classify(video, gotResult);
 }
 
 function setup() {
   createCanvas(canvasSize.width, canvasSize.height);
-  video = createCapture(VIDEO);
-  video.size(canvasSize.width, canvasSize.height);
-  video.hide();
 
-  // Classify the video
-  classifier.classifyStart(video, 3, gotResult);
+  createBalloons();
 }
 
 function draw() {
   background(220);
-  image(video, 0, 0);
 
-  // Draw the label with the highest confidence
-  if (label !== "") {
-    fill(255);
-    textSize(16);
-    text(label, 10, height - 10);
-    text(nf(confidence * 100, 0, 2) + "%", 10, height - 30);
+  // Update the balloons
+  updateBallooons();
+
+  // Draw a balloon
+  drawBalloons();
+
+  // Clean the balloons
+  cleanBalloons();
+}
+
+function createBalloons() {
+  // Create 5 balloons
+  for (let i = 0; i < 5; i++) {
+    balloons.push(new Balloon());
+  }
+}
+
+function updateBallooons() {
+  for (let i = 0; i < balloons.length; i++) {
+    balloons[i].update(deltaTime);
+  }
+}
+
+function drawBalloons() {
+  for (let i = 0; i < balloons.length; i++) {
+    balloons[i].display();
+  }
+}
+
+function cleanBalloons() {
+  // Remove the balloons that are out of the canvas
+  balloons = balloons.filter((balloon) => balloon.inCanvas);
+
+  // If there are less than 5 balloons
+  // create more balloons
+  if (balloons.length < 5) {
+    createBalloons();
   }
 }
